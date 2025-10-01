@@ -4,13 +4,8 @@ import tensorflow as tf
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoTokenizer, TFBertForMaskedLM
 
-# Pre-trained masked language model
 MODEL = "bert-base-uncased"
-
-# Number of predictions to generate
 K = 3
-
-# Constants for generating attention diagrams
 FONT = ImageFont.truetype("assets/fonts/OpenSans-Regular.ttf", 28)
 GRID_SIZE = 40
 PIXELS_PER_WORD = 200
@@ -59,10 +54,13 @@ def get_mask_token_index(mask_token_id, inputs):
 def get_color_for_attention_score(attention_score):
     """
     Return a tuple of three integers representing a shade of gray for the
-    given `attention_score`. Each value should be in the range [0, 255].
+    given `attention_score`.
     """
-    # TODO: Implement this function
-    raise NotImplementedError
+    R,G,B=(255,255,255)
+    R,G,B=(R*attention_score,G*attention_score,B*attention_score)
+    R,G,B= tuple(int(x) for x in (R,G,B))
+    return (R,G,B)
+
 
 
 
@@ -70,28 +68,21 @@ def visualize_attentions(tokens, attentions):
     """
     Produce a graphical representation of self-attention scores.
 
-    For each attention layer, one diagram should be generated for each
-    attention head in the layer. Each diagram should include the list of
-    `tokens` in the sentence. The filename for each diagram should
-    include both the layer number (starting count from 1) and head number
-    (starting count from 1).
+    For each attention layer, one diagram is generated for each
+    attention head in the layer. Each diagram includes the list of
+    `tokens` in the sentence. 
     """
-    # TODO: Update this function to produce diagrams for all layers and heads.
-    generate_diagram(
-        1,
-        1,
-        tokens,
-        attentions[0][0][0]
-    )
-
+    for layer_id, layer_att in enumerate(attentions):
+        heads = int(layer_att.shape[1])
+        for head_id in range(heads):
+            attention_weights = layer_att[0][head_id].numpy()
+            generate_diagram(layer_id + 1, head_id + 1, tokens, attention_weights)
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
     """
     Generate a diagram representing the self-attention scores for a single
     attention head. The diagram shows one row and column for each of the
-    `tokens`, and cells are shaded based on `attention_weights`, with lighter
-    cells corresponding to higher attention scores.
-
+    `tokens`
     The diagram is saved with a filename that includes both the `layer_number`
     and `head_number`.
     """
