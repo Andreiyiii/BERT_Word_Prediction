@@ -14,5 +14,6 @@ It allows you to predict masked tokens in a text using **BERT** and visualize th
 ```
 python main.py
 ```
-When prompted, enter a sentence containing the mask token "[MASK]"
+When prompted, enter a sentence containing the mask token "[MASK]".
+
 The script will display the top K predictions for the masked token in the console.
