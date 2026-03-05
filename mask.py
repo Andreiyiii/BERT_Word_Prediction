@@ -4,6 +4,8 @@ import tensorflow as tf
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoTokenizer, TFBertForMaskedLM
 
+#made this project in the CS50 Introduction to AI Course
+
 MODEL = "bert-base-uncased"
 K = 3
 FONT = ImageFont.truetype("assets/fonts/OpenSans-Regular.ttf", 28)
@@ -65,13 +67,6 @@ def get_color_for_attention_score(attention_score):
 
 
 def visualize_attentions(tokens, attentions):
-    """
-    Produce a graphical representation of self-attention scores.
-
-    For each attention layer, one diagram is generated for each
-    attention head in the layer. Each diagram includes the list of
-    `tokens` in the sentence. 
-    """
     for layer_id, layer_att in enumerate(attentions):
         heads = int(layer_att.shape[1])
         for head_id in range(heads):
@@ -79,13 +74,6 @@ def visualize_attentions(tokens, attentions):
             generate_diagram(layer_id + 1, head_id + 1, tokens, attention_weights)
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
-    """
-    Generate a diagram representing the self-attention scores for a single
-    attention head. The diagram shows one row and column for each of the
-    `tokens`
-    The diagram is saved with a filename that includes both the `layer_number`
-    and `head_number`.
-    """
     # Create new image
     image_size = GRID_SIZE * len(tokens) + PIXELS_PER_WORD
     img = Image.new("RGBA", (image_size, image_size), "black")
