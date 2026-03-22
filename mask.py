@@ -1,5 +1,7 @@
 import sys
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
 
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoTokenizer, TFBertForMaskedLM
@@ -34,7 +36,7 @@ def main():
         print(text.replace(tokenizer.mask_token, tokenizer.decode([token])))
 
     # Visualize attentions
-    visualize_attentions(inputs.tokens(), result.attentions)
+    visualize_attentions(inputs.tokens(), result.attentions, mask_token_index)
 
 
 def get_mask_token_index(mask_token_id, inputs):
@@ -48,7 +50,7 @@ def get_mask_token_index(mask_token_id, inputs):
     # print(inputs_ids)
     # print(inputs_ids==mask_token_id)
     if (inputs_ids==mask_token_id).nonzero()[0].size>0:
-        return (inputs_ids==mask_token_id).nonzero()[0]
+        return (inputs_ids==mask_token_id).nonzero()[0][0]
     else:
         return None
 
@@ -66,12 +68,19 @@ def get_color_for_attention_score(attention_score):
 
 
 
-def visualize_attentions(tokens, attentions):
-    for layer_id, layer_att in enumerate(attentions):
-        heads = int(layer_att.shape[1])
-        for head_id in range(heads):
-            attention_weights = layer_att[0][head_id].numpy()
-            generate_diagram(layer_id + 1, head_id + 1, tokens, attention_weights)
+def visualize_attentions(tokens, attentions, mask_token_index):
+    all_attn = np.mean([
+        layer_att[0].numpy()[:, mask_token_index, :]
+        for layer_att in attentions
+    ], axis=(0, 1))
+
+    plt.figure(figsize=(len(tokens) * 0.8 + 2, 4))
+    plt.bar(tokens, all_attn)
+    plt.title("Attention of [MASK] token (average across all layers & heads)")
+    plt.ylabel("Attention weight")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.show()
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
     # Create new image
